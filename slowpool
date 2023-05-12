@@ -1,0 +1,16 @@
+import torch.nn.functional as F
+
+class SlowPool(nn.Module):
+    def __init__(self, kernel_size, stride=1, padding=0):
+        super(SlowPool, self).__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+
+    def forward(self, x):
+        x = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode='constant')
+        out = torch.zeros(x.shape[0], x.shape[1], x.shape[2]//self.stride, x.shape[3]//self.stride, device=x.device)
+        for i in range(out.shape[2]):
+            for j in range(out.shape[3]):
+                out[:, :, i, j] = x[:, :, i*self.stride:i*self.stride+self.kernel_size, j*self.stride:j*self.stride+self.kernel_size].mean(dim=(-1,-2))
+        return out
