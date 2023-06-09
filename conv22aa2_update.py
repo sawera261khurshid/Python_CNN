@@ -37,17 +37,44 @@ class Conv3x3_1_to_n_padding:
                 im_region = image_padded[i:(i + 3), j:(j + 3)]
                 yield im_region, i, j
 
-    def forward(self, input):
-      print('Input shape:', input.shape)  # Add this line
-      self.last_input = input
-      h, w = input.shape
-      output = np.zeros((h, w, self.num_filters), dtype=self.dtype)
-      for im_region, i, j in self.iterate_regions(input):
-        output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
+       def forward(self, input):
+        if input.shape[-1] != self.filters.shape[-1]:
+            raise ValueError("Number of input channels does not match number of filters.")
+
+        print('Input shape:', input.shape)
+        self.last_input = input
+        output_shape = (*input.shape[:-1], self.num_filters)
+        output = np.zeros(output_shape, dtype=input.dtype)
+        for im_region, *indices in self.iterate_regions(input):
+            output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
         self.last_output = output
         if self.activation is not None:
-          output = self.activation(output)
-          return output
+            output = self.activation(output)
+        return output           
+                
+#     def forward(self, input):
+#       print('Input shape:', input.shape)  # Add this line
+#       self.last_input = input
+#       output_shape = (*input.shape[:-1], self.num_filters)
+#       output = np.zeros(output_shape, dtype=self.dtype)
+#       for im_region, *indices in self.iterate_regions(input):
+#         output[tuple(indices)] = np.sum(im_region * self.filters, axis=(1, 2))
+#         self.last_output = output
+#         if self.activation is not None:
+#           output = self.activation(output)
+#           return output
+        
+#     def forward(self, input):
+#       print('Input shape:', input.shape)  # Add this line
+#       self.last_input = input
+#       h, w = input.shape
+#       output = np.zeros((h, w, self.num_filters), dtype=self.dtype)
+#       for im_region, i, j in self.iterate_regions(input):
+#         output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
+#         self.last_output = output
+#         if self.activation is not None:
+#           output = self.activation(output)
+#           return output
 
     def backprop(self, d_L_d_out, learn_rate):
         '''
