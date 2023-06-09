@@ -211,18 +211,18 @@ class Conv3x3_1_to_n_padding:
 #         output = self.activation(output)
 #     return output
     
- def forward(self, input):
-  self.last_input = input
-  h, w, in_ch = input.shape
-  output = np.zeros((h, w , self.num_filters), dtype=self.dtype)
+  def forward(self, input):
+    self.last_input = input
+    h, w, in_ch = input.shape
+    output = np.zeros((h, w , self.num_filters), dtype=self.dtype)
 
-  for im_region, i, j in self.iterate_regions(input):
-    for f in range(self.num_filters):
-      output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
-      self.last_output = output
-      if self.activation is not None:
-        output = self.activation(output)
-      return output
+    for im_region, i, j in self.iterate_regions(input):
+      for f in range(self.num_filters):
+        output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
+        self.last_output = output
+        if self.activation is not None:
+          output = self.activation(output)
+        return output
   
   def backprop(self, d_L_d_out, learn_rate):
     '''
