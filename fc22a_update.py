@@ -16,7 +16,6 @@ class FC:
   def initialize_weights(self):
     self.weights = np.random.randn(*self.weights.shape).astype(self.dtype) / self.weights.shape[0]
     self.biases = np.zeros(self.biases.shape, dtype=self.dtype)
-
   def forward(self, input):
     '''
     Performs a forward pass of the FC layer using the given input.
