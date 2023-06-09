@@ -191,27 +191,39 @@ class Conv3x3_1_to_n_padding:
           im_region = image_padded[i:(i + 3), j:(j + 3)]
           yield im_region, i, j
 
-  def forward(self, input):
-    '''
-    Performs a forward pass of the conv layer using the given input.
-    Returns a 3d numpy array with dimensions (h, w, num_filters).
-    - input is a 2d numpy array
-    '''
-    self.last_input = input
+#   def forward(self, input):
+#     '''
+#     Performs a forward pass of the conv layer using the given input.
+#     Returns a 3d numpy array with dimensions (h, w, num_filters).
+#     - input is a 2d numpy array
+#     '''
+#     self.last_input = input
 
-    h, w = input.shape
-    output = np.zeros((h, w , self.num_filters), dtype = self.dtype)
-    # output = np.zeros((h - 2, w - 2, self.num_filters))
+#     h, w = input.shape
+#     output = np.zeros((h, w , self.num_filters), dtype = self.dtype)
+#     # output = np.zeros((h - 2, w - 2, self.num_filters))
 
-    for im_region, i, j in self.iterate_regions(input):
-      output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
+#     for im_region, i, j in self.iterate_regions(input):
+#       output[i, j] = np.sum(im_region * self.filters, axis=(1, 2))
 
-    self.last_output = output
-    if self.activation is not None:
-        output = self.activation(output)
-    return output
+#     self.last_output = output
+#     if self.activation is not None:
+#         output = self.activation(output)
+#     return output
     
+ def forward(self, input):
+  self.last_input = input
+  h, w, in_ch = input.shape
+  output = np.zeros((h, w , self.num_filters), dtype=self.dtype)
 
+  for im_region, i, j in self.iterate_regions(input):
+    for f in range(self.num_filters):
+      output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
+      self.last_output = output
+      if self.activation is not None:
+        output = self.activation(output)
+      return output
+  
   def backprop(self, d_L_d_out, learn_rate):
     '''
     Performs a backward pass of the conv layer.
