@@ -40,40 +40,19 @@ class Conv3x3_1_to_n_padding:
                 
     def forward(self, input):
         self.last_input = input
-        h, w, *_ = input.shape  # Unpack the shape into h and w variables
-        output = np.zeros((h - 2, w - 2, self.num_filters))
-        for im_region, i, j in self.iterate_regions(input):
-            output[i, j] = np.sum(im_region * self.filters, axis=(0, 1))
-            self.last_output = output
-            if self.activation is not None:
-                output = self.activation(output)
-                return output
+        if input.ndim == 2:  # Handle 2D input
+            input = np.expand_dims(input, axis=-1)
+            h, w, _ = input.shape
+            output = np.zeros((h - 2, w - 2, self.num_filters))
+            for im_region, i, j in self.iterate_regions(input):
+                output[i, j] = np.sum(im_region * self.filters, axis=(0, 1))
+                self.last_output = output
+                if self.activation is not None:
+                    output = self.activation(output)
+                    return output
             
-#     def forward(self, input):
-#         if input.shape[-1] != self.filters.shape[-1]:
-#             raise ValueError("Number of input channels does not match number of filters.")
-#             print('Input shape:', input.shape)
-#             self.last_input = input
-#             output_shape = (*input.shape[:-1], self.num_filters)
-#             output = np.zeros(output_shape, dtype=input.dtype)
-#             for im_region, *indices in self.iterate_regions(input):
-#                 output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
-#                 self.last_output = output
-#                 if self.activation is not None:
-#                     output = self.activation(output)
-#                     return output           
-                
-#     def forward(self, input):
-#       print('Input shape:', input.shape)  # Add this line
-#       self.last_input = input
-#       output_shape = (*input.shape[:-1], self.num_filters)
-#       output = np.zeros(output_shape, dtype=self.dtype)
-#       for im_region, *indices in self.iterate_regions(input):
-#         output[tuple(indices)] = np.sum(im_region * self.filters, axis=(1, 2))
-#         self.last_output = output
-#         if self.activation is not None:
-#           output = self.activation(output)
-#           return output
+
+
         
 #     def forward(self, input):
 #       print('Input shape:', input.shape)  # Add this line
@@ -145,14 +124,17 @@ class Conv3x3_n_to_n_padding:
                 
     def forward(self, input):
         self.last_input = input
-        h, w, *_ = input.shape  # Unpack the shape into h and w variables
-        output = np.zeros((h - 2, w - 2, self.num_filters))
-        for im_region, i, j in self.iterate_regions(input):
-            output[i, j] = np.sum(im_region * self.filters, axis=(0, 1))
-            self.last_output = output
-            if self.activation is not None:
-                output = self.activation(output)
-                return output
+        if input.ndim == 2:  # Handle 2D input
+            input = np.expand_dims(input, axis=-1)
+            h, w, _ = input.shape
+            output = np.zeros((h - 2, w - 2, self.num_filters))
+            for im_region, i, j in self.iterate_regions(input):
+                for f in range(self.num_filters):
+                    output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
+                    self.last_output = output
+                    if self.activation is not None:
+                        output = self.activation(output)
+                        return output
             
 #     def forward(self, input):
 #         print('Input shape:', input.shape)  # Add this line
