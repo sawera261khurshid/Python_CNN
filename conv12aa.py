@@ -15,6 +15,7 @@ how our MNIST images are stored. This works for us because we use it as the firs
 network, but most CNNs have many more Conv layers. If we were building a bigger network that needed
 to use Conv3x3 multiple times, we'd have to make the input be a 3d numpy array.
 '''
+# define class
 
 class Conv3x3:
   # A Convolution layer using 3x3 filters.
