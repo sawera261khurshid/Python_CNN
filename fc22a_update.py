@@ -59,6 +59,11 @@ class FC:
 
     return d_L_d_inputs.reshape(self.last_input_shape)
 
+ def get_weights(self):
+  return self.filters
+
+ def set_weights(self, weights):
+    self.weights = weights
 
 
 
