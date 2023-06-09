@@ -39,7 +39,7 @@ class FC:
   
   
 
-  def backprop(self, d_L_d_t, learn_rate):
+  def backward(self, d_L_d_t, learn_rate):
     if self.activation is not None:
         d_L_d_t *= self.activation.gradient(self.last_totals)
 
