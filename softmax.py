@@ -22,7 +22,7 @@ class Softmax:
   
   
 
-  def backprop(self, d_L_d_out):
+  def backward(self, d_L_d_out):
     '''
     Performs a backward pass of the softmax layer.
     Returns the loss gradient for this layer's inputs.
