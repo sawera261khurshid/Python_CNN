@@ -37,7 +37,7 @@ class Conv3x3_1_to_n_padding:
                 im_region = image_padded[i:(i + 3), j:(j + 3)]
                 yield im_region, i, j
 
-       def forward(self, input):
+    def forward(self, input):
         if input.shape[-1] != self.filters.shape[-1]:
             raise ValueError("Number of input channels does not match number of filters.")
 
