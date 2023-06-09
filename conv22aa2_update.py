@@ -38,18 +38,18 @@ class Conv3x3_1_to_n_padding:
                 yield im_region, i, j
 
     def forward(self, input):
-    if input.shape[-1] != self.filters.shape[-1]:
-        raise ValueError("Number of input channels does not match number of filters.")
-        print('Input shape:', input.shape)
-        self.last_input = input
-        output_shape = (*input.shape[:-1], self.num_filters)
-        output = np.zeros(output_shape, dtype=input.dtype)
-        for im_region, *indices in self.iterate_regions(input):
-            output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
-            self.last_output = output
-            if self.activation is not None:
-                output = self.activation(output)
-                return output           
+        if input.shape[-1] != self.filters.shape[-1]:
+            raise ValueError("Number of input channels does not match number of filters.")
+            print('Input shape:', input.shape)
+            self.last_input = input
+            output_shape = (*input.shape[:-1], self.num_filters)
+            output = np.zeros(output_shape, dtype=input.dtype)
+            for im_region, *indices in self.iterate_regions(input):
+                output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
+                self.last_output = output
+                if self.activation is not None:
+                    output = self.activation(output)
+                    return output           
                 
 #     def forward(self, input):
 #       print('Input shape:', input.shape)  # Add this line
@@ -132,18 +132,18 @@ class Conv3x3_n_to_n_padding:
 
                 
     def forward(self, input):
-    if input.shape[-1] != self.filters.shape[-1]:
-        raise ValueError("Number of input channels does not match number of filters.")
-        print('Input shape:', input.shape)
-        self.last_input = input
-        output_shape = (*input.shape[:-1], self.num_filters)
-        output = np.zeros(output_shape, dtype=input.dtype)
-        for im_region, *indices in self.iterate_regions(input):
-            output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
-            self.last_output = output
-            if self.activation is not None:
-                output = self.activation(output)
-                return output 
+        if input.shape[-1] != self.filters.shape[-1]:
+            raise ValueError("Number of input channels does not match number of filters.")
+            print('Input shape:', input.shape)
+            self.last_input = input
+            output_shape = (*input.shape[:-1], self.num_filters)
+            output = np.zeros(output_shape, dtype=input.dtype)
+            for im_region, *indices in self.iterate_regions(input):
+                output[tuple(indices)] = np.sum(im_region * self.filters, axis=(0, 1))
+                self.last_output = output
+                if self.activation is not None:
+                    output = self.activation(output)
+                    return output 
             
 #     def forward(self, input):
 #         print('Input shape:', input.shape)  # Add this line
