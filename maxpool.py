@@ -1,6 +1,8 @@
 import numpy as np
 
 class MaxPool2:
+  def __init__(self):
+    self.weights = None
   # A Max Pooling layer using a pool size of 2.
 
   def iterate_regions(self, image):
