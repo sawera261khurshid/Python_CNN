@@ -35,7 +35,7 @@ class MaxPool2:
 
     return output
 
-  def backprop(self, d_L_d_out):
+  def backward(self, d_L_d_out):
     '''
     Performs a backward pass of the maxpool layer.
     Returns the loss gradient for this layer's inputs.
