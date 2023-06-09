@@ -209,7 +209,7 @@ class Conv3x3_1_to_n_padding:
     self.last_output = output
     if self.activation is not None:
         output = self.activation(output)
-        return output
+    return output
     
 
   def backprop(self, d_L_d_out, learn_rate):
@@ -286,19 +286,19 @@ class Conv3x3_n_to_n_padding:
           im_region = image_padded[i:(i + 3), j:(j + 3), :]
           yield im_region, i, j
 
-  def forward(self, input1):
+  def forward(self, input):
     '''
     Performs a forward pass of the conv layer using the given input.
     Returns a 3d numpy array with dimensions (h, w, num_filters).
     - input is a 2d numpy array
     '''
-    self.last_input = input1
+    self.last_input = input
 
     h, w, c = input.shape
     output = np.zeros((h, w , self.num_filters), dtype = self.dtype)
     # output = np.zeros((h - 2, w - 2, self.num_filters))
 
-    for im_region, i, j in self.iterate_regions(input1):
+    for im_region, i, j in self.iterate_regions(input):
       for filter in range(self.num_filters):
         output[i, j, filter] = np.sum(im_region * self.filters[filter,:,:,:], axis=(0, 1, 2))
 
@@ -306,7 +306,7 @@ class Conv3x3_n_to_n_padding:
     self.last_output = output
     if self.activation is not None:
         output = self.activation(output)
-        return output
+    return output
       
 # def forward(self, input):
 #   self.last_input = input
