@@ -36,25 +36,36 @@ class MaxPool2:
     return output
 
   def backward(self, d_L_d_out):
-    '''
-    Performs a backward pass of the maxpool layer.
-    Returns the loss gradient for this layer's inputs.
-    - d_L_d_out is the loss gradient for this layer's outputs.
-    '''
-    d_L_d_input = np.zeros(self.last_input.shape)
+    d_L_d_input = np.zeros(self.input.shape)
+    for i in range(0, d_L_d_out.shape[0]):
+      for j in range(0, d_L_d_out.shape[1]):
+        for f in range(d_L_d_out.shape[2]):
+          patch = self.input[i*2:i*2+2, j*2:j*2+2, f]
+          max_val = np.max(patch)
+          mask = patch == max_val
+          d_L_d_input[i*2:i*2+2, j*2:j*2+2, f] = mask * d_L_d_out[i, j, f]
+    return d_L_d_input 
+        
+#   def backward(self, d_L_d_out):
+#     '''
+#     Performs a backward pass of the maxpool layer.
+#     Returns the loss gradient for this layer's inputs.
+#     - d_L_d_out is the loss gradient for this layer's outputs.
+#     '''
+#     d_L_d_input = np.zeros(self.last_input.shape)
 
-    for im_region, i, j in self.iterate_regions(self.last_input):
-      h, w, f = im_region.shape
-      amax = np.amax(im_region, axis=(0, 1))
+#     for im_region, i, j in self.iterate_regions(self.last_input):
+#       h, w, f = im_region.shape
+#       amax = np.amax(im_region, axis=(0, 1))
 
-      for i2 in range(h):
-        for j2 in range(w):
-          for f2 in range(f):
-            # If this pixel was the max value, copy the gradient to it.
-            if im_region[i2, j2, f2] == amax[f2]:
-              d_L_d_input[i * 2 + i2, j * 2 + j2, f2] = d_L_d_out[i, j, f2]
+#       for i2 in range(h):
+#         for j2 in range(w):
+#           for f2 in range(f):
+#             # If this pixel was the max value, copy the gradient to it.
+#             if im_region[i2, j2, f2] == amax[f2]:
+#               d_L_d_input[i * 2 + i2, j * 2 + j2, f2] = d_L_d_out[i, j, f2]
 
-    return d_L_d_input
+#     return d_L_d_input
 
 
 
