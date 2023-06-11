@@ -1,4 +1,6 @@
 import numpy as np
+import itertools
+
 
 class MaxPool2:
   def __init__(self):
