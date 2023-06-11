@@ -38,18 +38,18 @@ class MaxPool2:
     return output
  
   def backward(self, d_L_d_out):
-    d_L_d_input = np.zeros_like(self.last_input)
+    d_L_d_input = np.zeros(self.last_input.shape)
 
-    for i, j, f in itertools.product(range(self.last_input.shape[0] // 2),
-                                     range(self.last_input.shape[1] // 2),
-                                     range(self.last_input.shape[2])):
-        # Get the region to pool
-        im_region = self.last_input[i*2:(i*2+2), j*2:(j*2+2), f]
+    for im_region, i, j, f in self.iterate_regions(self.last_input):
+        h, w, _ = im_region.shape
+        amax = np.amax(im_region, axis=(0, 1))
 
-        # Compute the gradient
-        max_value = np.max(im_region)
-        mask = im_region == max_value
-        d_L_d_input[i*2:(i*2+2), j*2:(j*2+2), f] = np.sum(mask * d_L_d_out[i, j, f])
+        for i2 in range(h):
+            for j2 in range(w):
+                for f2 in range(d_L_d_out.shape[2]):
+                    # If this pixel was the max value, copy the gradient to it.
+                    if im_region[i2, j2, f2] == amax[f2]:
+                        d_L_d_input[i * 2 + i2, j * 2 + j2, f2] = d_L_d_out[i, j, f2]
 
     return d_L_d_input
   
