@@ -15,7 +15,8 @@ class MaxPool2:
     for i in range(new_h):
         for j in range(new_w):
             im_region = input[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
-            yield im_region, i, j
+            yield im_region, i, j, None
+            
 #   def iterate_regions(self, image):
 #     '''
 #     Generates non-overlapping 2x2 image regions to pool over.
