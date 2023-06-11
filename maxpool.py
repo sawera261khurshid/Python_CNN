@@ -8,18 +8,28 @@ class MaxPool2:
   # A Max Pooling layer using a pool size of 2.
 
   def iterate_regions(self, image):
-    '''
-    Generates non-overlapping 2x2 image regions to pool over.
-    - image is a 2d numpy array
-    '''
-    h, w, _ = image.shape
+    h, w, num_filters = image.shape
     new_h = h // 2
     new_w = w // 2
 
     for i in range(new_h):
-      for j in range(new_w):
-        im_region = image[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2)]
-        yield im_region, i, j
+        for j in range(new_w):
+            im_region = image[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
+            yield im_region, i, j, num_filters
+            
+#   def iterate_regions(self, image):
+#     '''
+#     Generates non-overlapping 2x2 image regions to pool over.
+#     - image is a 2d numpy array
+#     '''
+#     h, w, _ = image.shape
+#     new_h = h // 2
+#     new_w = w // 2
+
+#     for i in range(new_h):
+#       for j in range(new_w):
+#         im_region = image[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2)]
+#         yield im_region, i, j
 
   def forward(self, input):
     '''
