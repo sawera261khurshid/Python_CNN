@@ -15,7 +15,7 @@ class MaxPool2:
     for i in range(new_h):
         for j in range(new_w):
             im_region = input[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
-            yield im_region, i, j, None
+            yield im_region, i, j
             
 #   def iterate_regions(self, image):
 #     '''
@@ -46,11 +46,11 @@ class MaxPool2:
       output[i, j] = np.amax(im_region, axis=(0, 1))
 
     return output
- 
+  
   def backward(self, d_L_d_out):
     d_L_d_input = np.zeros(self.last_input.shape)
 
-    for im_region, i, j, f in self.iterate_regions(self.last_input):
+    for im_region, i, j in self.iterate_regions(self.last_input):
         h, w, _ = im_region.shape
         amax = np.amax(im_region, axis=(0, 1))
 
@@ -62,6 +62,22 @@ class MaxPool2:
                         d_L_d_input[i * 2 + i2, j * 2 + j2, f2] = d_L_d_out[i, j, f2]
 
     return d_L_d_input
+ 
+#   def backward(self, d_L_d_out):
+#     d_L_d_input = np.zeros(self.last_input.shape)
+
+#     for im_region, i, j, f in self.iterate_regions(self.last_input):
+#         h, w, _ = im_region.shape
+#         amax = np.amax(im_region, axis=(0, 1))
+
+#         for i2 in range(h):
+#             for j2 in range(w):
+#                 for f2 in range(d_L_d_out.shape[2]):
+#                     # If this pixel was the max value, copy the gradient to it.
+#                     if im_region[i2, j2, f2] == amax[f2]:
+#                         d_L_d_input[i * 2 + i2, j * 2 + j2, f2] = d_L_d_out[i, j, f2]
+
+#     return d_L_d_input
   
 
 #   def backward(self, d_L_d_out):
