@@ -37,26 +37,23 @@ class MaxPool2:
 
     return output
  
-
   def backward(self, d_L_d_out):
     d_L_d_input = np.zeros_like(self.last_input)
 
-    # Pooling operation
     for i, j, f in itertools.product(range(self.last_input.shape[0] // 2),
                                      range(self.last_input.shape[1] // 2),
                                      range(self.last_input.shape[2])):
-        i *= 2
-        j *= 2
-        
-        im_region = self.last_input[i:i + 2, j:j + 2, f].reshape(2, 2)
-
-        # Find the indices of the max value in the input region
-        max_indices = np.unravel_index(np.argmax(im_region), (2, 2))
+        # Get the region to pool
+        im_region = self.last_input[i*2:(i*2+2), j*2:(j*2+2), f]
 
         # Compute the gradient
-        d_L_d_input[i + max_indices[0], j + max_indices[1], f] = d_L_d_out[i // 2, j // 2, f]
+        max_value = np.max(im_region)
+        mask = im_region == max_value
+        d_L_d_input[i*2:(i*2+2), j*2:(j*2+2), f] = np.sum(mask * d_L_d_out[i, j, f])
 
     return d_L_d_input
+  
+
 #   def backward(self, d_L_d_out):
 #     d_L_d_input = np.zeros(self.input.shape)
 #     for i in range(0, d_L_d_out.shape[0]):
