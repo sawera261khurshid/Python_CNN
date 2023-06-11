@@ -7,25 +7,16 @@ class MaxPool2:
     self.weights = None
   # A Max Pooling layer using a pool size of 2.
 
+
   def iterate_regions(self, input):
-        h, w, num_filters = input.shape
-        new_h = h // 2
-        new_w = w // 2
+    h, w, num_filters = input.shape
+    new_h = h // 2
+    new_w = w // 2
 
-        for i in range(new_h):
-            for j in range(new_w):
-                im_region = input[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
-                yield im_region
-
-#   def iterate_regions(self, input):
-#     h, w, num_filters = input.shape
-#     new_h = h // 2
-#     new_w = w // 2
-
-#     for i in range(new_h):
-#         for j in range(new_w):
-#             im_region = input[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
-#             yield im_region, i, j, None
+    for i in range(new_h):
+        for j in range(new_w):
+            im_region = input[(i * 2):(i * 2 + 2), (j * 2):(j * 2 + 2), :]
+            yield im_region, i, j
             
 #   def iterate_regions(self, image):
 #     '''
