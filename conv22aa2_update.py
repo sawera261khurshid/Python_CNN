@@ -224,33 +224,51 @@ class Conv3x3_1_to_n_padding:
           output = self.activation(output)
         return output
   
-  def backward(self, d_L_d_out, learn_rate):
-    '''
-    Performs a backward pass of the conv layer.
-    - d_L_d_out is the loss gradient for this layer's outputs.
-    - learn_rate is a float.
-    '''
-    d_L_d_filters = np.zeros(self.filters.shape, dtype = self.dtype)
-    d_L_d_input   = np.zeros(self.last_input.shape, dtype = self.dtype) 
+#   def backward(self, d_L_d_out, learn_rate):
+#     '''
+#     Performs a backward pass of the conv layer.
+#     - d_L_d_out is the loss gradient for this layer's outputs.
+#     - learn_rate is a float.
+#     '''
+#     d_L_d_filters = np.zeros(self.filters.shape, dtype = self.dtype)
+#     d_L_d_input   = np.zeros(self.last_input.shape, dtype = self.dtype) 
     
-    if self.activation is not None:
-        d_L_d_out = self.activation.backward(self.last_output) * d_L_d_out
+#     if self.activation is not None:
+#         d_L_d_out = self.activation.backward(self.last_output) * d_L_d_out
 
-    for im_region, i, j in self.iterate_regions(self.last_input):
-      for f in range(self.num_filters):
-        d_L_d_filters[f] += d_L_d_out[i, j, f] * im_region
+#     for im_region, i, j in self.iterate_regions(self.last_input):
+#       for f in range(self.num_filters):
+#         d_L_d_filters[f] += d_L_d_out[i, j, f] * im_region
     
-    for out_ch in range(self.num_filters):
-      d_L_d_input[:,:] += d_L_d_out[:,:, out_ch] * self.last_input[:,:]
+#     for out_ch in range(self.num_filters):
+#       d_L_d_input[:,:] += d_L_d_out[:,:, out_ch] * self.last_input[:,:]
         
         
-    # errors of previous layer = weights_of_this_layer-T * errors of this layer
+#     # errors of previous layer = weights_of_this_layer-T * errors of this layer
     
-    # Update filters
-    self.filters -= learn_rate * d_L_d_filters
+#     # Update filters
+#     self.filters -= learn_rate * d_L_d_filters
     
-    return d_L_d_input
+#     return d_L_d_input
 
+
+    def backward(self, d_L_d_out, learn_rate):
+      d_L_d_filters = np.zeros(self.filters.shape, dtype=self.dtype)
+
+      for im_region, i, j in self.iterate_regions(self.last_input):
+          for f in range(self.num_filters):
+              d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j, f], axis=(0, 1))
+
+      d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
+
+      for im_region, i, j in self.iterate_regions(d_L_d_out):
+        for in_ch in range(self.in_channels):
+          d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size, in_ch] += np.sum(
+            np.transpose(self.filters[:, :, in_ch, :], axes=(1, 2, 0)) * im_region, axis=(0, 1, 2))
+          self.filters -= learn_rate * d_L_d_filters
+          self.biases -= learn_rate * np.sum(d_L_d_out, axis=(0, 1))
+          return d_L_d_input
+      
     def get_weights(self):
         return self.filters
 
