@@ -68,6 +68,8 @@ class Conv3x3:
     return None
 
 
+  
+  
 class Conv3x3_padding:
   # A Convolution layer using 3x3 filters.
 
@@ -190,6 +192,38 @@ class Conv3x3_1_to_n_padding:
       for j in range(w - 2):
           im_region = image_padded[i:(i + 3), j:(j + 3)]
           yield im_region, i, j
+    
+  def forward(self, input):
+    self.last_input = input
+    h, w, in_ch = input.shape
+    output = np.zeros((h, w , self.num_filters), dtype=self.dtype)
+
+    for im_region, i, j in self.iterate_regions(input):
+      for f in range(self.num_filters):
+        output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
+        self.last_output = output
+        if self.activation is not None:
+          output = self.activation(output)
+        return output
+
+  def backward(self, d_L_d_out, learn_rate):
+    d_L_d_filters = np.zeros(self.filters.shape, dtype=self.dtype)
+    for im_region, i, j in self.iterate_regions(self.last_input):
+      for f in range(self.num_filters):
+        d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j, f], axis=(0, 1))
+        d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
+        for im_region, i, j in self.iterate_regions(d_L_d_out):
+          d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size] += np.sum(
+            self.filters[:, :, :, :] * im_region[:, :, np.newaxis, np.newaxis], axis=(3, 4))
+          self.filters -= learn_rate * d_L_d_filters
+          self.biases -= learn_rate * np.sum(d_L_d_out, axis=(0, 1))
+          return d_L_d_input
+      
+  def get_weights(self):
+    return self.filters
+
+  def set_weights(self, filters):
+    self.filters = filters
 
 #   def forward(self, input):
 #     '''
@@ -210,20 +244,7 @@ class Conv3x3_1_to_n_padding:
 #     if self.activation is not None:
 #         output = self.activation(output)
 #     return output
-    
-  def forward(self, input):
-    self.last_input = input
-    h, w, in_ch = input.shape
-    output = np.zeros((h, w , self.num_filters), dtype=self.dtype)
 
-    for im_region, i, j in self.iterate_regions(input):
-      for f in range(self.num_filters):
-        output[i, j, f] = np.sum(im_region * self.filters[f], axis=(0, 1, 2))
-        self.last_output = output
-        if self.activation is not None:
-          output = self.activation(output)
-        return output
-  
 #   def backward(self, d_L_d_out, learn_rate):
 #     '''
 #     Performs a backward pass of the conv layer.
@@ -250,34 +271,6 @@ class Conv3x3_1_to_n_padding:
 #     self.filters -= learn_rate * d_L_d_filters
     
 #     return d_L_d_input
-
-
-    def backward(self, d_L_d_out, learn_rate):
-      d_L_d_filters = np.zeros(self.filters.shape, dtype=self.dtype)
-
-      for im_region, i, j in self.iterate_regions(self.last_input):
-          for f in range(self.num_filters):
-              d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j, f], axis=(0, 1))
-
-      d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
-
-      for im_region, i, j in self.iterate_regions(d_L_d_out):
-        for in_ch in range(self.in_channels):
-          d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size, in_ch] += np.sum(
-            np.transpose(self.filters[:, :, in_ch, :], axes=(1, 2, 0)) * im_region, axis=(0, 1, 2))
-          self.filters -= learn_rate * d_L_d_filters
-          self.biases -= learn_rate * np.sum(d_L_d_out, axis=(0, 1))
-          return d_L_d_input
-      
-    def get_weights(self):
-        return self.filters
-
-    def set_weights(self, filters):
-        self.filters = filters
-
-
-
-
 
 
 
@@ -338,6 +331,69 @@ class Conv3x3_n_to_n_padding:
         output = self.activation(output)
     return output
       
+  def backward(self, d_L_d_out, learn_rate):
+      # Calculate gradients for filters and input
+      d_L_d_filters = np.zeros(self.filters.shape, dtype=self.dtype)
+
+      for im_region, i, j in self.iterate_regions(self.last_input):
+          for f in range(self.num_filters):
+              d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j, :, f], axis=(0, 1))
+
+      d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
+
+      for im_region, i, j in self.iterate_regions(d_L_d_out):
+          for in_ch in range(self.in_channels):
+              d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size, in_ch] += np.sum(
+                  self.filters[:, :, in_ch, :] * im_region[:, :, np.newaxis, :], axis=(3, 4))
+
+      # Update the weights and biases using the gradients
+      self.filters -= learn_rate * d_L_d_filters
+      self.biases -= learn_rate * np.sum(d_L_d_out, axis=(0, 1))
+
+      return d_L_d_input
+    
+  def get_weights(self):
+    return self.filters
+  def set_weights(self, filters):
+    self.filters = filters
+
+
+
+
+
+
+
+#def backward(self, d_L_d_out, learn_rate):
+#     '''
+#     Performs a backward pass of the conv layer.
+#     - d_L_d_out is the loss gradient for this layer's outputs.
+#     - learn_rate is a float.
+#     '''
+#     d_L_d_filters = np.zeros(self.filters.shape, dtype = self.dtype)
+#     if self.activation is not None:
+#         d_L_d_out = self.activation.backward(self.last_output) * d_L_d_out
+
+#     for im_region, i, j in self.iterate_regions(self.last_input):
+#       for f in range(self.num_filters):
+#         d_L_d_filters[f] += d_L_d_out[i, j, f] * im_region
+    
+    
+    
+#     d_L_d_input   = np.zeros(self.last_input.shape, dtype = self.dtype) 
+      
+#     # Method 4
+#     for im_region, i, j in self.iterate_regions(d_L_d_out):
+#       for in_ch in range(d_L_d_input.shape[-1]):
+#         # d_L_d_input[i,j,in_ch] += np.sum ( im_region[:,:,:] * np.transpose( self.filters[:,:,:,in_ch]) , axis=(0,1,2) )
+# #         d_L_d_input[i,j,in_ch] += np.sum( np.matmul( im_region[:,:,:] , np.transpose( self.filters[:,:,:,in_ch] , axes=(2,0,1)) ) , axis=(0,1,2) )
+#           d_L_d_input[i, j, in_ch] += np.sum(im_region * self.filters[:, :, :, in_ch], axis=(0, 1, 2))
+
+
+#     # Update filters
+#     self.filters -= learn_rate * d_L_d_filters
+
+#     return d_L_d_input
+
 # def forward(self, input):
 #   self.last_input = input
 
@@ -352,54 +408,6 @@ class Conv3x3_n_to_n_padding:
 #   if self.activation is not None:
 #     output = self.activation(output)
 #     return output
-
-
-
-  def backward(self, d_L_d_out, learn_rate):
-    '''
-    Performs a backward pass of the conv layer.
-    - d_L_d_out is the loss gradient for this layer's outputs.
-    - learn_rate is a float.
-    '''
-    d_L_d_filters = np.zeros(self.filters.shape, dtype = self.dtype)
-    if self.activation is not None:
-        d_L_d_out = self.activation.backward(self.last_output) * d_L_d_out
-
-    for im_region, i, j in self.iterate_regions(self.last_input):
-      for f in range(self.num_filters):
-        d_L_d_filters[f] += d_L_d_out[i, j, f] * im_region
-    
-    
-    
-    d_L_d_input   = np.zeros(self.last_input.shape, dtype = self.dtype) 
-      
-    # Method 4
-    for im_region, i, j in self.iterate_regions(d_L_d_out):
-      for in_ch in range(d_L_d_input.shape[-1]):
-        # d_L_d_input[i,j,in_ch] += np.sum ( im_region[:,:,:] * np.transpose( self.filters[:,:,:,in_ch]) , axis=(0,1,2) )
-#         d_L_d_input[i,j,in_ch] += np.sum( np.matmul( im_region[:,:,:] , np.transpose( self.filters[:,:,:,in_ch] , axes=(2,0,1)) ) , axis=(0,1,2) )
-          d_L_d_input[i, j, in_ch] += np.sum(im_region * self.filters[:, :, :, in_ch], axis=(0, 1, 2))
-
-
-    # Update filters
-    self.filters -= learn_rate * d_L_d_filters
-
-    return d_L_d_input
-    
-    def get_weights(self):
-        return self.filters
-
-    def set_weights(self, filters):
-        self.filters = filters
-
-
-
-
-
-
-
-
-
 
 
 
