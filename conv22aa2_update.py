@@ -332,21 +332,15 @@ class Conv3x3_n_to_n_padding:
     return output
       
   def backward(self, d_L_d_out, learn_rate):
-      # Calculate gradients for filters and input
       d_L_d_filters = np.zeros(self.filters.shape, dtype=self.dtype)
+      d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
 
       for im_region, i, j in self.iterate_regions(self.last_input):
           for f in range(self.num_filters):
-              d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j, :, f], axis=(0, 1))
+              d_L_d_filters[:, :, :, f] += np.sum(im_region * d_L_d_out[i, j], axis=(0, 1))
+              d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size, :] += np.sum(self.filters[:, :, :, f] * d_L_d_out[i, j], axis=2)
 
-      d_L_d_input = np.zeros(self.last_input.shape, dtype=self.dtype)
-
-      for im_region, i, j in self.iterate_regions(d_L_d_out):
-          for in_ch in range(self.in_channels):
-              d_L_d_input[i:i + self.kernel_size, j:j + self.kernel_size, in_ch] += np.sum(
-                  self.filters[:, :, in_ch, :] * im_region[:, :, np.newaxis, :], axis=(3, 4))
-
-      # Update the weights and biases using the gradients
+      # Update weights and biases
       self.filters -= learn_rate * d_L_d_filters
       self.biases -= learn_rate * np.sum(d_L_d_out, axis=(0, 1))
 
