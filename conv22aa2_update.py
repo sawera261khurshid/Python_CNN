@@ -224,7 +224,7 @@ class Conv3x3_1_to_n_padding:
           output = self.activation(output)
         return output
   
-  def backprop(self, d_L_d_out, learn_rate):
+  def backward(self, d_L_d_out, learn_rate):
     '''
     Performs a backward pass of the conv layer.
     - d_L_d_out is the loss gradient for this layer's outputs.
@@ -337,7 +337,7 @@ class Conv3x3_n_to_n_padding:
 
 
 
-  def backprop(self, d_L_d_out, learn_rate):
+  def backward(self, d_L_d_out, learn_rate):
     '''
     Performs a backward pass of the conv layer.
     - d_L_d_out is the loss gradient for this layer's outputs.
