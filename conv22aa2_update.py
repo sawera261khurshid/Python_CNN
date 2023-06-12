@@ -359,8 +359,9 @@ class Conv3x3_n_to_n_padding:
     for im_region, i, j in self.iterate_regions(d_L_d_out):
       for in_ch in range(d_L_d_input.shape[-1]):
         # d_L_d_input[i,j,in_ch] += np.sum ( im_region[:,:,:] * np.transpose( self.filters[:,:,:,in_ch]) , axis=(0,1,2) )
-        d_L_d_input[i,j,in_ch] += np.sum( np.matmul( im_region[:,:,:] , np.transpose( self.filters[:,:,:,in_ch] , axes=(2,0,1)) ) , axis=(0,1,2) )
-  
+#         d_L_d_input[i,j,in_ch] += np.sum( np.matmul( im_region[:,:,:] , np.transpose( self.filters[:,:,:,in_ch] , axes=(2,0,1)) ) , axis=(0,1,2) )
+          d_L_d_input[i, j, in_ch] += np.sum(im_region * self.filters[:, :, :, in_ch], axis=(0, 1, 2))
+
 
     # Update filters
     self.filters -= learn_rate * d_L_d_filters
