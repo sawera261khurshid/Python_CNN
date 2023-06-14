@@ -24,8 +24,8 @@ class Softmax:
     '''
     self.last_totals = input.astype(np.float16)
 
-    shiftx = input - np.max(self.last_totals, dtype=np.float16)
-    exp = np.exp(shiftx, dtype=np.float16)
+    shiftx = input - np.max(self.last_totals)
+    exp = np.exp(shiftx)
     out = exp / np.sum(exp, axis=0, dtype=np.float16)
     return out
 
