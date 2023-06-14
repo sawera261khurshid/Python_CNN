@@ -12,8 +12,8 @@ class Conv3x3_1_to_n_padding:
   # A Convolution layer using 3x3 filters.
 
   def __init__(self, output=1, input=1):
-    num_filters = np.float16(output)
-    in_ch = np.float16(input)
+    num_filters = output
+    in_ch = input
 
     self.num_filters = num_filters
 
@@ -83,8 +83,8 @@ class Conv3x3_n_to_n_padding:
   # A Convolution layer using 3x3 filters.
 
   def __init__(self, output=1, input=1):
-    num_filters = np.float16(output)
-    in_ch = np.float16(input)
+    num_filters = output
+    in_ch = input
 
     self.num_filters = num_filters
 
