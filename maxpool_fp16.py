@@ -38,7 +38,7 @@ class MaxPool2:
     output = np.zeros((h // 2, w // 2, num_filters), dtype = np.float16)
 
     for im_region, i, j in self.iterate_regions(input):
-      output[i, j] = np.amax(im_region, axis=(0, 1), dtype = np.float16)
+      output[i, j] = np.amax(im_region, axis=(0, 1))
 
     return output
 
