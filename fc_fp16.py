@@ -57,12 +57,12 @@ class FC:
     d_t_d_inputs = self.weights
 
     # Gradients of loss against weights/biases/input
-    d_L_d_w = d_t_d_w[np.newaxis].T @ d_L_d_t[np.newaxis].astype(np.float16)
+    d_L_d_w = d_t_d_w[np.newaxis].T @ d_L_d_t[np.newaxis]
     d_L_d_b = d_L_d_t * d_t_d_b
-    d_L_d_inputs = d_t_d_inputs @ d_L_d_t.astype(np.float16)
+    d_L_d_inputs = d_t_d_inputs @ d_L_d_t
 
     # Update weights / biases
     self.weights -= learn_rate * d_L_d_w
     self.biases -= learn_rate * d_L_d_b
 
-    return d_L_d_inputs.reshape(self.last_input_shape).astype(np.float16)
+    return d_L_d_inputs.reshape(self.last_input_shape)
