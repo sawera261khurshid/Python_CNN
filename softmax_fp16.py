@@ -22,11 +22,11 @@ class Softmax:
     Returns a 1d numpy array containing the respective probability values.
     - input can be any array with any dimensions.
     '''
-    self.last_totals = input.astype(np.float16)
+    self.last_totals = input
 
     shiftx = input - np.max(self.last_totals)
     exp = np.exp(shiftx)
-    out = exp / np.sum(exp, axis=0, dtype=np.float16)
+    out = exp / np.sum(exp, axis=0)
     return out
 
 
