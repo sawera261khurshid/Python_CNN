@@ -28,12 +28,12 @@ class FC:
     '''
     self.last_input_shape = input.shape
     input = input.flatten().astype(np.float16)
-    self.last_input = input
+    self.last_input = input.astype(np.float16)
 
     input_len, nodes = self.weights.shape
 
     totals = np.dot(input, self.weights).astype(np.float16) + self.biases
-    self.last_totals = totals
+    self.last_totals = totals.astype(np.float16)
 
     return totals
 
