@@ -24,7 +24,7 @@ class Softmax:
     '''
     self.last_totals = input
 
-    shiftx = input - np.max(self.last_totals)
+    shiftx = input - np.max(input)
     exp = np.exp(shiftx)
     out = exp / np.sum(exp, axis=0)
     return out
@@ -56,5 +56,4 @@ class Softmax:
 
       # Gradients of loss against totals
       d_L_d_t = gradient * d_out_d_t
-
-    return d_L_d_t
+      return d_L_d_t
