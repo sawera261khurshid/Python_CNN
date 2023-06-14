@@ -44,10 +44,10 @@ class Softmax:
         continue
 
       # e^totals
-      t_exp = np.exp(self.last_totals, dtype=np.float16)
+      t_exp = np.exp(self.last_totals)
 
       # Sum of all e^totals
-      S = np.sum(t_exp, dtype=np.float16)
+      S = np.sum(t_exp)
       if S==0: S=1
 
       # Gradients of out[i] against totals
@@ -57,4 +57,4 @@ class Softmax:
       # Gradients of loss against totals
       d_L_d_t = gradient * d_out_d_t
 
-    return d_L_d_t
+    return d_L_d_t.astype(np.float16
