@@ -57,4 +57,4 @@ class Softmax:
       # Gradients of loss against totals
       d_L_d_t = gradient * d_out_d_t
 
-      return d_L_d_t
+    return d_L_d_t
