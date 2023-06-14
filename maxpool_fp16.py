@@ -52,7 +52,7 @@ class MaxPool2:
 
     for im_region, i, j in self.iterate_regions(self.last_input):
       h, w, f = im_region.shape
-      amax = np.amax(im_region, axis=(0, 1), dtype=np.float16)
+      amax = np.amax(im_region.astype(np.float16), axis=(0, 1))
 
       for i2 in range(h):
         for j2 in range(w):
