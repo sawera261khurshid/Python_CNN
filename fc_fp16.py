@@ -12,10 +12,11 @@ import numpy as np
 class FC:
   # A standard fully-connected layer with softmax activation.
 
-  def __init__(self, input_len, nodes):
+  def __init__(self, input_len, nodes, loss_scaling = 128.0):
     # We divide by input_len to reduce the variance of our initial values
     self.weights = np.random.randn(input_len, nodes).astype(np.float16) / input_len
     self.biases = np.zeros(nodes, dtype=np.float16)
+    self.loss_scaling = loss_scaling
     np.save('linear_filters',self.weights)
     np.save('linear_biases' ,self.biases)
 
@@ -32,14 +33,18 @@ class FC:
 
     input_len, nodes = self.weights.shape
 
-    totals = np.dot(input, self.weights).astype(np.float16) + self.biases
-    self.last_totals = totals.astype(np.float16)
+    totals = np.dot(input, self.weights).astype(np.float32) + self.biases
+    scaledd_loss = loss * self.loss_scaling
+    self.last_totals = totals
 
-    return totals
+    # loss = self.loss_function(totals, labels)
+    # scaled_loss = loss*self.loss_scaling
+
+    return totals.astype(np.float16), scaled_loss
 
 
 
-  def backprop(self, d_L_d_t, learn_rate):
+  def backprop(self, d_L_d_t_scaled, learn_rate):
     '''
     Performs a backward pass of the softmax layer.
     Returns the loss gradient for this layer's inputs.
@@ -52,17 +57,18 @@ class FC:
     #     continue
 
     # Gradients of totals against weights/biases/input
-    d_t_d_w = self.last_input
+    # d_L_d_t = d_L_d_t_scaled / self.loss_scaling
+    d_t_d_w = self.last_input.astype(np.float16)
     d_t_d_b = 1
-    d_t_d_inputs = self.weights
+    d_t_d_inputs = self.weights.astype(np.float16)
 
     # Gradients of loss against weights/biases/input
-    d_L_d_w = d_t_d_w[np.newaxis].T @ d_L_d_t[np.newaxis]
-    d_L_d_b = d_L_d_t * d_t_d_b
-    d_L_d_inputs = d_t_d_inputs @ d_L_d_t
+    d_L_d_w = d_t_d_w[np.newaxis].T @ d_L_d_t_scaled[np.newaxis]
+    d_L_d_b = d_L_d_t_scaled * d_t_d_b
+    d_L_d_inputs = d_t_d_inputs @ d_L_d_t_scaled
 
     # Update weights / biases
-    self.weights -= learn_rate * d_L_d_w
-    self.biases -= learn_rate * d_L_d_b
+    self.weights -= learn_rate * d_L_d_w.astype(np.float32)
+    self.biases -= learn_rate * d_L_d_b.astype(np.float32)
 
-    return d_L_d_inputs.reshape(self.last_input_shape)
+    return d_L_d_inputs.reshape(self.last_input_shape).astype(np.float16)
