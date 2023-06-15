@@ -16,7 +16,7 @@ class Softmax:
     pass
 
 
-  def forward(self, input):
+  def forward(self, input, loss_scaling):
     '''
     Performs a forward pass of the softmax layer using the given input.
     Returns a 1d numpy array containing the respective probability values.
@@ -27,7 +27,8 @@ class Softmax:
     shiftx = input - np.max(input)
     exp = np.exp(shiftx)
     out = exp / np.sum(exp, axis=0)
-    return out
+    scaled_out = out * loss_scaling
+    return scaled_out
 
 
 
