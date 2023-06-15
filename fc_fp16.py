@@ -21,7 +21,7 @@ class FC:
     np.save('linear_biases' ,self.biases)
 
 
-  def forward(self, input):
+  def forward(self, input, loss = None):
     '''
     Performs a forward pass of the FC layer using the given input.
     Returns a 1d numpy array containing the respective values.
@@ -34,7 +34,8 @@ class FC:
     input_len, nodes = self.weights.shape
 
     totals = np.dot(input, self.weights).astype(np.float32) + self.biases
-    scaled_loss = loss * self.loss_scaling
+    if loss is not None:
+        scaled_loss = loss * self.loss_scaling
     self.last_totals = totals
 
     # loss = self.loss_function(totals, labels)
