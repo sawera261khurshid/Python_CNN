@@ -34,9 +34,11 @@ class FC:
     input_len, nodes = self.weights.shape
 
     totals = np.dot(input, self.weights).astype(np.float32) + self.biases
-    if loss is not None:
-        scaled_loss = loss * self.loss_scaling
-    self.last_totals = totals
+    scaled_loss = loss * self.loss_scaling if loss is not None else None
+
+    # if loss is not None:
+    #     scaled_loss = loss * self.loss_scaling
+    # self.last_totals = totals
 
     # loss = self.loss_function(totals, labels)
     # scaled_loss = loss*self.loss_scaling
