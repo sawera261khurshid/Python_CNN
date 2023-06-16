@@ -43,7 +43,7 @@ class FC:
     # loss = self.loss_function(totals, labels)
     # scaled_loss = loss*self.loss_scaling
 
-    return totals.astype(np.float16), scaled_loss
+    return totals.astype(np.float16)
 
 
 
